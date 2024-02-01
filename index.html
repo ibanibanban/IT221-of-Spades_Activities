@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT221 of Spades</title>
+  <style>
+
+#hangaroo-header {
+    font-size: 50px;
+  }
+
+
+  #group-members-header {
+    font-size: 24px;
+    margin-top: 20px;
+    background-color: black; /* Set the background color to black */
+    color: white; /* Set the font color to white */
+    padding: 10px; /* Add some padding for better visibility */
+  }
+
+  #group-members-list {
+    font-size: 18px;
+    margin-top: 10px;
+    background-color: black; /* Set the background color to black */
+    color: white; /* Set the font color to white */
+    padding: 10px; /* Add some padding for better visibility */
+  }
+
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: url('gamingbg8.png') no-repeat center center fixed;
+    background-size: 100% 100%;
+    height: 100%;
+}
+
+.container {
+    max-width: 600px;
+    margin-top: 100px; /* Adjust the top margin as needed */
+}
+
+/* Other styles remain unchanged */
+
+
+    #word-display {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+
+    #question-display,
+    #level-display,
+    #lives-display,
+    #score-display {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+
+    #alphabet-buttons {
+      margin-top: 20px;
+    }
+
+    button {
+      font-size: 18px;
+      margin: 5px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    #hint-message {
+      color: red;
+      margin-top: 10px;
+    }
+
+    .correct {
+      background-color: green;
+    }
+
+    .incorrect {
+      background-color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 id="hangaroo-header">Hangaroo Game</h1>
+
+  <div id="question-display"></div>
+  <div id="word-display"></div>
+  <div id="level-display">Level: Easy</div>
+  <div id="lives-display">Lives: 3</div>
+  <div id="score-display">Score: 0</div>
+  <div id="alphabet-buttons"></div>
+
+  <button id="hint-button" onclick="provideHint()">Hint</button>
+  <div id="hint-message"></div>
+
+<h2 id="group-members-header">Group Members</h2>
+  <div id="group-members-list">
+    <p>John Carl Papa</p>
+    <p>Joris Aguarin</p>
+    <p>Hans Ivan Dumalo</p>
+    <p>Adrian Parado</p>
+    <p>Sean Villanueva</p>
+  </div>
+
+
+  <script>
+    const levels = [
+      {
+        "easy": [
+          { word: "apple", question: "Red fruit" },
+          { word: "banana", question: "Yellow fruit" },
+          { word: "cherry", question: "Small and red" },
+          { word: "date", question: "Sweet and wrinkled" },
+          { word: "grape", question: "Comes in bunches" },
+          { word: "kiwi", question: "Fuzzy brown skin" },
+          { word: "lemon", question: "Sour and yellow" },
+          { word: "melon", question: "Large and juicy" },
+          { word: "orange", question: "Citrus and round" },
+          { word: "peach", question: "Soft with a pit" }
+        ]
+      },
+      {
+        "difficult": [
+          { word: "python", question: "High-level programming language" },
+          { word: "javascript", question: "Client-side scripting language" },
+          { word: "mongodb", question: "NoSQL database program" },
+          { word: "json", question: "Data interchange format" },
+          { word: "java", question: "Object-oriented programming language" },
+          { word: "html", question: "Markup language for web documents" },
+          { word: "css", question: "Style sheet language for web documents" },
+          { word: "c", question: "Procedural programming language" },
+          { word: "csharp", question: "Strongly typed programming language" },
+          { word: "golang", question: "Compiled programming language" }
+        ]
+      },
+      {
+        "expert": [
+          { word: "algorithm", question: "Set of instructions to solve a problem" },
+          { word: "database", question: "Organized collection of data" },
+          { word: "network", question: "Interconnected group or system" },
+          { word: "encryption", question: "Conversion of data into a code" },
+          { word: "framework", question: "Pre-built structure for software development" },
+          { word: "repository", question: "Central location for storing and managing files" },
+          { word: "middleware", question: "Software layer that connects different applications" },
+          { word: "scalability", question: "Ability to handle growing amounts of work" },
+          { word: "cybersecurity", question: "Protection of computer systems from theft or damage" },
+          { word: "virtualization", question: "Creation of a virtual version of something" }
+        ]
+      }
+    ];
+
+    let currentLevelIndex = 0;
+    let currentWordIndex = 0;
+    let currentWord = "";
+    let currentQuestion = "";
+    let wrongGuesses = 0;
+    let remainingLives = 3;
+    let score = 0;
+
+    function startGame() {
+      currentWord = levels[currentLevelIndex][Object.keys(levels[currentLevelIndex])[0]][currentWordIndex].word;
+      currentQuestion = levels[currentLevelIndex][Object.keys(levels[currentLevelIndex])[0]][currentWordIndex].question;
+
+      displayWord();
+      displayQuestion();
+      displayAlphabetButtons();
+      updateLivesDisplay();
+      updateLevelDisplay();
+      updateScoreDisplay();
+    }
+
+    function displayWord() {
+      const wordDisplay = document.getElementById("word-display");
+      wordDisplay.textContent = "";
+      for (let letter of currentWord) {
+        if (letter === " ") {
+          wordDisplay.textContent += " ";
+        } else {
+          wordDisplay.textContent += "_ ";
+        }
+      }
+    }
+
+    function displayQuestion() {
+      const questionDisplay = document.getElementById("question-display");
+      questionDisplay.textContent = `Question: ${currentQuestion}`;
+    }
+
+    function displayAlphabetButtons() {
+      const alphabetButtons = document.getElementById("alphabet-buttons");
+      alphabetButtons.textContent = "";
+
+      for (let i = 65; i <= 90; i++) {
+        const letter = String.fromCharCode(i);
+        const button = document.createElement("button");
+        button.textContent = letter;
+        button.addEventListener("click", () => checkGuess(letter, button));
+        alphabetButtons.appendChild(button);
+      }
+    }
+
+    function provideHint() {
+      const wordDisplay = document.getElementById("word-display");
+      const hintMessage = document.getElementById("hint-message");
+
+      if (score >= 25) {
+        const hiddenLetters = [];
+
+        for (let i = 0; i < currentWord.length; i++) {
+          if (currentWord[i] !== " " && wordDisplay.textContent[i * 2] === "_") {
+            hiddenLetters.push(currentWord[i]);
+          }
+        }
+
+        if (hiddenLetters.length > 0) {
+          const randomIndex = Math.floor(Math.random() * hiddenLetters.length);
+          const hintLetter = hiddenLetters[randomIndex];
+
+          // Update the word display with the hint letter
+          for (let i = 0; i < currentWord.length; i++) {
+            if (currentWord[i].toLowerCase() === hintLetter.toLowerCase()) {
+              wordDisplay.textContent = wordDisplay.textContent.substring(0, i * 2) + `${currentWord[i]} ` + wordDisplay.textContent.substring((i + 1) * 2);
+              break;
+            }
+          }
+
+          // Deduct 25 from the score for using a hint
+          score -= 25;
+          updateScoreDisplay();
+
+          // Clear previous hint message
+          hintMessage.textContent = "";
+        }
+      } else {
+        hintMessage.textContent = "You don't have enough score for a hint (25 points required).";
+      }
+    }
+
+    function checkGuess(letter, button) {
+      const wordDisplay = document.getElementById("word-display");
+      let updatedDisplay = "";
+
+      if (currentWord.includes(letter.toLowerCase()) || currentWord.includes(letter.toUpperCase())) {
+        for (let i = 0; i < currentWord.length; i++) {
+          if (currentWord[i].toLowerCase() === letter.toLowerCase()) {
+            updatedDisplay += `${currentWord[i]} `;
+          } else {
+            updatedDisplay += wordDisplay.textContent[i * 2] === "_" ? "_ " : `${currentWord[i]} `;
+          }
+        }
+
+        wordDisplay.textContent = updatedDisplay;
+
+        if (!updatedDisplay.includes("_")) {
+          // Word is completely guessed
+          score += 10;
+          button.classList.add("correct");
+          alert(`Correct! Score: ${score}`);
+          nextWord();
+        }
+      } else {
+        button.classList.add("incorrect");
+        wrongGuesses++;
+        remainingLives--;
+
+        // Update the lives display
+        updateLivesDisplay();
+
+        if (remainingLives === 0) {
+          alert("Game over! You've run out of lives.");
+          resetGame();
+        }
+      }
+
+      // Disable the button after a guess
+      button.disabled = true;
+    }
+
+    function nextWord() {
+      const hintMessage = document.getElementById("hint-message");
+      hintMessage.textContent = ""; // Clear hint message on advancing to the next word
+
+      currentWordIndex++;
+      if (currentWordIndex < levels[currentLevelIndex][Object.keys(levels[currentLevelIndex])[0]].length) {
+        currentWord = levels[currentLevelIndex][Object.keys(levels[currentLevelIndex])[0]][currentWordIndex].word;
+        currentQuestion = levels[currentLevelIndex][Object.keys(levels[currentLevelIndex])[0]][currentWordIndex].question;
+        displayWord();
+        displayQuestion();
+        displayAlphabetButtons();
+      } else {
+        alert(`Congratulations! You've completed the ${Object.keys(levels[currentLevelIndex])[0]} level. Moving on to the next level.`);
+        currentLevelIndex++;
+        currentWordIndex = 0;
+        if (currentLevelIndex < levels.length) {
+          startGame();
+        } else {
+          alert("Congratulations! You've completed all levels.");
+          resetGame();
+        }
+      }
+
+      // Update the score display after completing a word
+      updateScoreDisplay();
+    }
+
+    function resetGame() {
+      currentLevelIndex = 0;
+      currentWordIndex = 0;
+      currentWord = "";
+      currentQuestion = "";
+      wrongGuesses = 0;
+      remainingLives = 3;
+      score = 0;
+      startGame();
+    }
+
+    function updateLivesDisplay() {
+      const livesDisplay = document.getElementById("lives-display");
+      livesDisplay.textContent = `Lives: ${remainingLives}`;
+    }
+
+    function updateLevelDisplay() {
+      const levelDisplay = document.getElementById("level-display");
+      const difficulty = Object.keys(levels[currentLevelIndex])[0];
+      levelDisplay.textContent = `Level: ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`;
+    }
+
+    function updateScoreDisplay() {
+      const scoreDisplay = document.getElementById("score-display");
+      scoreDisplay.textContent = `Score: ${score}`;
+    }
+
+    // Start the game
+    startGame();
+  </script>
+</body>
+</html>
